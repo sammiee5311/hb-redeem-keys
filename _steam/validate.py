@@ -9,7 +9,7 @@ def filter_key(key):
     return True if re.fullmatch(pattern, key) else False
 
 
-def validate_key(key):
+def is_validated_key(key):
     # https://steamdb.info
     if filter_key(key):
         pass
