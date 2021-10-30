@@ -1,7 +1,6 @@
 import pickle
 
 import requests
-from requests.utils import cookiejar_from_dict, dict_from_cookiejar
 
 from config.log import logger
 
@@ -16,6 +15,6 @@ def load_cookies(file_name: str) -> requests.Session:
 
 
 def save_cookies(file_name: str, session: requests.Session):
+    logger.info(f"Saving cookies to {file_name!r}")
     with open(file_name, "wb") as file:
-        logger.info(f"Saving cookies to {file_name!r}")
         pickle.dump(session.cookies, file)
