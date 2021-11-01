@@ -14,7 +14,7 @@ steam_user = login_steam(username, password)
 
 steam_user.session.get(STEAM_REGISTER_KEY)
 
-get_list_of_owned_games()
+games = get_list_of_owned_games()
 
 
 key = ""
@@ -25,4 +25,3 @@ if is_validated_key(key):
         STEAM_REGISTER_KEY_URI,
         data={"product_key": key, "sessionid": steam_user.session_id},
     )
-    print(response.json())
