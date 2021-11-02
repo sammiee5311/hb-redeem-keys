@@ -7,3 +7,6 @@ cachetools
 protobuf
 enum34
 python-dotenv
+pydantic
+cloudscraper
+backoff

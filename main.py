@@ -3,6 +3,7 @@ import requests
 from _steam.helper import get_list_of_owned_games, is_validated_key
 from _steam.login import login_steam
 from config.log import logger
+from hb.humblebundle import HumbleBundle
 
 STEAM_REGISTER_KEY = "https://store.steampowered.com/account/registerkey"
 STEAM_REGISTER_KEY_URI = "https://store.steampowered.com/account/ajaxregisterkey"
@@ -16,6 +17,9 @@ steam_user.session.get(STEAM_REGISTER_KEY)
 
 games = get_list_of_owned_games()
 
+
+hb = HumbleBundle()
+hb.login()
 
 key = ""
 
