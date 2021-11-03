@@ -4,3 +4,4 @@ venv/
 __pycache__/
 *.pyc
 config/steam_cookie.pkl
+config/hb_cookies.pkl

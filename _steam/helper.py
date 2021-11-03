@@ -16,7 +16,6 @@ STEAM_GET_OWNED_GAMES_URI = f"http://api.steampowered.com/IPlayerService/GetOwne
 
 
 def filter_key(key: str) -> bool:
-    logger.info("Filtering the steam key")
     pattern = r"([0-9A-Z]{5}-){4}[0-9A-Z]{5}|([0-9A-Z]{5}-){2}[0-9A-Z]{5}"
     return True if re.fullmatch(pattern, key) else False
 
