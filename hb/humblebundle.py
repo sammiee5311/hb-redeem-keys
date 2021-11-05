@@ -2,7 +2,6 @@ import os
 import platform
 import re
 from collections import OrderedDict, defaultdict
-from time import sleep
 from typing import Optional
 
 import backoff
@@ -13,11 +12,13 @@ from config._cookies import load_cookies, save_cookies
 from pydantic import constr
 from pydantic.dataclasses import dataclass
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 Response = requests.models.Response
 
 CHROME_DRIVER = "hb/chromedriver.exe" if platform.system().lower() == "windows" else "hb/chromedriver"
 
+HB_LOGIN_BUTTON_PATH = "/html/body/div[1]/div[3]/div[2]/div/div/div/section[1]/form/button"
 HB_ORDER_HISTORIES_URI = "https://www.humblebundle.com/api/v1/user/order"
 HB_ORDER_EACH_HISTORY_URI = "https://www.humblebundle.com/api/v1/order"
 HB_LOGIN_URI = "https://www.humblebundle.com/login"
@@ -85,16 +86,21 @@ class HumbleBundle:
 
     def login_with_seleninum(self, session: requests.Session) -> requests.Session:
 
-        driver = selenium.webdriver.Chrome()
-        driver.get("https://www.humblebundle.com/login")
+        driver = selenium.webdriver.Chrome(CHROME_DRIVER)
+        driver.get(HB_LOGIN_URI)
         driver.find_element(by=By.NAME, value="username").send_keys(self.account.username)
         driver.find_element(by=By.NAME, value="password").send_keys(self.account.password)
         driver.find_element(
-            by=By.XPATH, value="/html/body/div[1]/div[3]/div[2]/div/div/div/section[1]/form/button"
+            by=By.XPATH, value=HB_LOGIN_BUTTON_PATH
         ).click()
-        sleep(40)
+
+        WebDriverWait(driver, 30).until(
+            lambda driver: len(driver.find_element(by=By.NAME, value="code"
+        ).get_attribute("value")) == 7)
+
         for cookie in driver.get_cookies():
             session.cookies[cookie["name"]] = cookie["value"]
+
         save_cookies(HB_COOKIES, session)
 
         return session
