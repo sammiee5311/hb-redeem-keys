@@ -14,6 +14,8 @@ from pydantic import constr
 from pydantic.dataclasses import dataclass
 from selenium.webdriver.common.by import By
 
+Response = requests.models.Response
+
 CHROME_DRIVER = "hb/chromedriver.exe" if platform.system().lower() == "windows" else "hb/chromedriver"
 
 HB_ORDER_HISTORIES_URI = "https://www.humblebundle.com/api/v1/user/order"
@@ -61,13 +63,14 @@ class HumbleBundle:
 
     @staticmethod
     @backoff.on_exception(backoff.expo, pydantic.error_wrappers.ValidationError, max_tries=3, giveup=too_many_tried)
-    def get_account():
+    def get_account() -> Account:
         username = input("Please, type humble bundle email: ")
         password = input("Please, type humble bundle password: ")
         account = Account(username, password)
+
         return account
 
-    def set_humble_choice_keys(self, response):
+    def set_humble_choice_keys(self, response: Response):
         for data in response.json():
             gamekey_json = data["gamekey"]
             each_response = self.session.get(
@@ -80,7 +83,7 @@ class HumbleBundle:
                     re.findall(r'"redeemed_key_val":"([0-9A-Z]{5}-[0-9A-Z]{5}-[0-9A-Z]{5})', each_response),
                 )
 
-    def login_with_seleninum(self, session: requests.Session):
+    def login_with_seleninum(self, session: requests.Session) -> requests.Session:
 
         driver = selenium.webdriver.Chrome()
         driver.get("https://www.humblebundle.com/login")
@@ -109,7 +112,7 @@ class HumbleBundle:
         else:
             self.session = self.login_with_seleninum(session)
 
-    def get_humbel_choice_keys(self):
+    def get_humbel_choice_keys(self) -> defaultdict[str, list[tuple]]:
         response = self.session.get(HB_ORDER_HISTORIES_URI)
 
         self.set_humble_choice_keys(response)
