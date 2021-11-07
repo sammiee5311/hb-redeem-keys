@@ -1,10 +1,10 @@
 import os
 
-from config._cookies import load_cookies, save_cookies
+from config.cookies.helper import load_cookies, save_cookies
 from config.log import logger
 from steam.webauth import WebAuth
 
-STEAM_COOKIES = "config/steam_cookie.pkl"
+STEAM_COOKIES = "config/cookies/steam_cookie.pkl"
 
 
 def login_steam(username: str, password: str = "") -> WebAuth:

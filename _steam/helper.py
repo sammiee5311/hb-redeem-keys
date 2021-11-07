@@ -3,16 +3,18 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-import requests
 from config.log import logger
 from dotenv import load_dotenv
+from requests.sessions import Session
 
 ENV_PATH = Path("./config/") / ".env"
 load_dotenv(dotenv_path=ENV_PATH)
 
 
 STEAM_API_KEY = os.environ["STEAM_API_KEY"]
-STEAM_GET_OWNED_GAMES_URI = f"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={STEAM_API_KEY}&steamid=76561197960434622&format=json"
+STEAM_OWNED_GAME_URI = f"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={STEAM_API_KEY}&steamid=76561197960434622&format=json"
+STEAM_OWNED_GAME_LIST = f"https://store.steampowered.com/dynamicstore/userdata/"
+STEAM_GAME_LIST = f"https://api.steampowered.com/ISteamApps/GetAppList/v2/"
 
 
 def filter_key(key: str) -> bool:
@@ -25,11 +27,14 @@ def is_validated_key(key: str) -> bool:
     return filter_key(key)
 
 
-def get_list_of_owned_games() -> List[Optional[str]]:
+def get_list_of_owned_games_and_list_of_steam_games(session: Session) -> List[Optional[str]]:
     logger.info("Getting list of owned games.")
-    response = requests.get(STEAM_GET_OWNED_GAMES_URI)
+    owned_game_list_response = session.get(STEAM_OWNED_GAME_LIST)
+    game_list_response = session.get(STEAM_GAME_LIST)
 
-    raw_html = response.content.decode("utf-8")
-    games = re.findall(r'"appid":([0-9]*)', raw_html)
+    owned_games_raw_html = owned_game_list_response.content.decode("utf-8")
+    game_list_raw_html = game_list_response.content.decode("utf-8")
+    owned_games = set(re.findall(r",*([0-9]*),*", owned_games_raw_html))
+    steam_games = set(re.findall(r'"appid":([0-9]*)', game_list_raw_html))
 
-    return games
+    return owned_games, steam_games

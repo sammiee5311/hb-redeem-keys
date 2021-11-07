@@ -3,5 +3,6 @@ venv/
 .DS_Store
 __pycache__/
 *.pyc
-config/steam_cookie.pkl
-config/hb_cookies.pkl
+config/*/*.pkl
+config/.env
+config/gmail/*.json
