@@ -20,9 +20,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 Response = requests.models.Response
 
+
 CHROME_DRIVER = "hb/chromedriver.exe" if platform.system().lower() == "windows" else "hb/chromedriver"
 
-HB_LOGIN_BUTTON_PATH = "/html/body/div[1]/div[3]/div[2]/div/div/div/section[1]/form/button"
+HB_LOGIN_BUTTON = "/html/body/div[1]/div[3]/div[2]/div/div/div/section[1]/form/button"
+HB_ACCOUNT_PROTECTION_BUTTON = "/html/body/div[1]/div[3]/div[2]/div/div/div/section/form/button"
 HB_ORDER_HISTORIES_URI = "https://www.humblebundle.com/api/v1/user/order"
 HB_ORDER_EACH_HISTORY_URI = "https://www.humblebundle.com/api/v1/order"
 HB_LOGIN_URI = "https://www.humblebundle.com/login"
@@ -95,13 +97,13 @@ class HumbleBundle:
         driver.get(HB_LOGIN_URI)
         driver.find_element(by=By.NAME, value="username").send_keys(self.account.username)
         driver.find_element(by=By.NAME, value="password").send_keys(self.account.password)
-        driver.find_element(by=By.XPATH, value=HB_LOGIN_BUTTON_PATH).click()
+        driver.find_element(by=By.XPATH, value=HB_LOGIN_BUTTON).click()
 
         time.sleep(2)
 
         if gmail_access:
             logger.info("Getting emails content from gmail.")
-            self.gmail.set_messages_from_gmail()
+            self.gmail.process_gmail_api()
             account_protection_key = self.gmail.get_humble_bundle_account_protection()
             driver.find_element(by=By.NAME, value="code").send_keys(account_protection_key)
 
@@ -109,9 +111,7 @@ class HumbleBundle:
             lambda driver: len(driver.find_element(by=By.NAME, value="code").get_attribute("value")) == 7
         )
 
-        driver.find_element(
-            by=By.XPATH, value="/html/body/div[1]/div[3]/div[2]/div/div/div/section/form/button"
-        ).click()
+        driver.find_element(by=By.XPATH, value=HB_ACCOUNT_PROTECTION_BUTTON).click()
 
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, '//*[@id="mm-0"]/div[1]/nav/a[1]')))
 

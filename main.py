@@ -5,16 +5,18 @@ from _steam.helper import (
     is_validated_key,
 )
 from _steam.login import login_steam
-from config.cookies.helper import load_cookies
 from config.log import logger
 from hb.humblebundle import HumbleBundle
 
 STEAM_REGISTER_KEY = "https://store.steampowered.com/account/registerkey"
 STEAM_REGISTER_KEY_URI = "https://store.steampowered.com/account/ajaxregisterkey"
+_time = 1
 
 
 def wait_for_next_key_redeem():
-    sleep(5)
+    global _time
+    sleep(_time * 2)
+    _time += 1
 
 
 steam_username = ""

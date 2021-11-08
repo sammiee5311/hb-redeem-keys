@@ -53,16 +53,22 @@ class GmailAPI:
 
             self.save_token()
 
-    def set_messages_from_gmail(self) -> None:
+    def get_gmail_service(self):
+        return build("gmail", "v1", credentials=self.creds)
+
+    def get_latest_emails(self):
+        self.service = self.get_gmail_service()
+
+        results = self.service.users().messages().list(userId="me").execute()
+        self.messages = results.get("messages")
+
+    def process_gmail_api(self) -> None:
         if os.path.exists(TOKEN_PATH):
             self.creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
 
         self.check_and_save_token_if_creds_not_valid()
 
-        self.service = build("gmail", "v1", credentials=self.creds)
-
-        results = self.service.users().messages().list(userId="me").execute()
-        self.messages = results.get("messages")
+        self.get_latest_emails()
 
     def decode_email(self, payload: dict[str, Union[str, list[dict[str, Any]]]]) -> str:
         logger.info("Decoding email content from gmail.")
@@ -71,6 +77,7 @@ class GmailAPI:
         data = parts["body"]["data"]
         data = data.replace("-", "+").replace("_", "/")
         decoded_data = base64.b64decode(data)
+
         if platform.system().lower() == "windows":
             soup = BeautifulSoup(decoded_data, "lxml")
             body = soup.body()
@@ -91,7 +98,7 @@ class GmailAPI:
 
     @backoff.on_exception(backoff.expo, NotFoundEmail, max_tries=10, giveup=trying_to_find)
     def get_humble_bundle_account_protection(self) -> str:
-        self.set_messages_from_gmail()
+        self.get_latest_emails()
 
         for i, msg in enumerate(self.messages):
             if i > 2:
